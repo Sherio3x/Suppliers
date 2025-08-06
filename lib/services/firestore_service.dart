@@ -134,10 +134,6 @@ class FirestoreService {
       'remainingBalance': totalInvoices - totalPaid,
     };
   }
-}
-
-
-
   Stream<List<dynamic>> getAllMovementsForSupplier(String supplierId) {
     return _db.collection("invoices")
         .where("supplierId", isEqualTo: supplierId)
@@ -164,5 +160,4 @@ class FirestoreService {
       return movements;
     });
   }
-
-
+}
