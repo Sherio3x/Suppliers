@@ -1,0 +1,87 @@
+{
+  "project_info": {
+    "project_number": "168108819165",
+    "firebase_url": "https://rock-task-338600-default-rtdb.firebaseio.com",
+    "project_id": "rock-task-338600",
+    "storage_bucket": "rock-task-338600.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168108819165:android:c176bdba7eec3bedb8d134",
+        "android_client_info": {
+          "package_name": "com.SYTStudio.WallpaperStore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkZsQ8Wm4UZOQmrcTQcmYAjju90bu3R5Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168108819165:android:c38886936555a641b8d134",
+        "android_client_info": {
+          "package_name": "com.SYTStudio.WallpaperStoreAdmin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkZsQ8Wm4UZOQmrcTQcmYAjju90bu3R5Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168108819165:android:ca2258efd4448f39b8d134",
+        "android_client_info": {
+          "package_name": "com.dapporapp.warraqlaib"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkZsQ8Wm4UZOQmrcTQcmYAjju90bu3R5Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168108819165:android:c906897344aee850b8d134",
+        "android_client_info": {
+          "package_name": "com.droswakhotap.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkZsQ8Wm4UZOQmrcTQcmYAjju90bu3R5Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
