@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supplier_invoice_app/models/supplier.dart';
-import 'package:supplier_invoice_app/services/firestore_service.dart';
+import 'package:supplier_invoice_app/services/realtime_database_service.dart';
 import 'package:supplier_invoice_app/screens/add_edit_supplier_screen.dart';
 import 'package:supplier_invoice_app/screens/supplier_details_screen.dart';
 
@@ -12,7 +12,7 @@ class SupplierListScreen extends StatefulWidget {
 }
 
 class _SupplierListScreenState extends State<SupplierListScreen> {
-  final FirestoreService _firestoreService = FirestoreService();
+  final RealtimeDatabaseService _realtimeDatabaseService = RealtimeDatabaseService();
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: StreamBuilder<List<Supplier>>(
-        stream: _firestoreService.getSuppliers(),
+        stream: _realtimeDatabaseService.getSuppliers(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('خطأ: ${snapshot.error}'));
@@ -64,7 +64,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                       IconButton(
                         icon: const Icon(Icons.delete),
                         onPressed: () {
-                          _firestoreService.deleteSupplier(supplier.id!); 
+                          _realtimeDatabaseService.deleteSupplier(supplier.id!); 
                         },
                       ),
                     ],

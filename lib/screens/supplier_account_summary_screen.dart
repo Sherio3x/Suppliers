@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supplier_invoice_app/models/supplier.dart';
-import 'package:supplier_invoice_app/services/firestore_service.dart';
+import 'package:supplier_invoice_app/services/realtime_database_service.dart';
 import 'package:supplier_invoice_app/models/invoice.dart';
 import 'package:supplier_invoice_app/models/payment.dart';
 
@@ -14,7 +14,7 @@ class SupplierAccountSummaryScreen extends StatefulWidget {
 }
 
 class _SupplierAccountSummaryScreenState extends State<SupplierAccountSummaryScreen> {
-  final FirestoreService _firestoreService = FirestoreService();
+  final RealtimeDatabaseService _realtimeDatabaseService = RealtimeDatabaseService();
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class _SupplierAccountSummaryScreenState extends State<SupplierAccountSummaryScr
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             FutureBuilder<Map<String, double>>(
-              future: _firestoreService.getSupplierSummary(widget.supplier.id!),
+              future: _realtimeDatabaseService.getSupplierSummary(widget.supplier.id!),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -76,7 +76,7 @@ class _SupplierAccountSummaryScreenState extends State<SupplierAccountSummaryScr
             const SizedBox(height: 8),
             Expanded(
               child: StreamBuilder<List<dynamic>>(
-                stream: _firestoreService.getAllMovementsForSupplier(widget.supplier.id!),
+                stream: _realtimeDatabaseService.getAllMovementsForSupplier(widget.supplier.id!),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());

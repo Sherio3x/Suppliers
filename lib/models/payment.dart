@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class Payment {
   String? id;
@@ -13,22 +13,20 @@ class Payment {
     required this.date,
   });
 
-  factory Payment.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map<String, dynamic>;
+  factory Payment.fromRealtimeDatabase(String id, dynamic data) {
     return Payment(
-      id: doc.id,
+      id: id,
       invoiceId: data['invoiceId'] ?? '',
       amount: (data['amount'] ?? 0).toDouble(),
-      date: (data['date'] as Timestamp).toDate(),
+      date: DateTime.parse(data['date']),
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toRealtimeDatabase() {
     return {
       'invoiceId': invoiceId,
       'amount': amount,
-      'date': Timestamp.fromDate(date),
+      'date': date.toIso8601String(),
     };
   }
 }
-

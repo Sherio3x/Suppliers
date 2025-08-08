@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supplier_invoice_app/models/supplier.dart';
-import 'package:supplier_invoice_app/services/firestore_service.dart';
+import 'package:supplier_invoice_app/services/realtime_database_service.dart';
 
 class AddEditSupplierScreen extends StatefulWidget {
   final Supplier? supplier;
@@ -15,7 +15,7 @@ class _AddEditSupplierScreenState extends State<AddEditSupplierScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _productTypeController = TextEditingController();
-  final FirestoreService _firestoreService = FirestoreService();
+  final RealtimeDatabaseService _realtimeDatabaseService = RealtimeDatabaseService();
 
   @override
   void initState() {
@@ -43,9 +43,9 @@ class _AddEditSupplierScreenState extends State<AddEditSupplierScreen> {
 
       try {
         if (widget.supplier == null) {
-          await _firestoreService.addSupplier(supplier);
+          await _realtimeDatabaseService.addSupplier(supplier);
         } else {
-          await _firestoreService.updateSupplier(supplier);
+          await _realtimeDatabaseService.updateSupplier(supplier);
         }
         Navigator.pop(context);
       } catch (e) {

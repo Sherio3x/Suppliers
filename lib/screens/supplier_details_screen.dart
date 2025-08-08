@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supplier_invoice_app/models/supplier.dart';
 import 'package:supplier_invoice_app/models/invoice.dart';
-import 'package:supplier_invoice_app/services/firestore_service.dart';
+import 'package:supplier_invoice_app/services/realtime_database_service.dart';
 import 'package:supplier_invoice_app/screens/add_edit_invoice_screen.dart';
 import 'package:supplier_invoice_app/screens/invoice_details_screen.dart';
 import 'package:supplier_invoice_app/screens/supplier_account_summary_screen.dart';
@@ -16,7 +16,7 @@ class SupplierDetailsScreen extends StatefulWidget {
 }
 
 class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
-  final FirestoreService _firestoreService = FirestoreService();
+  final RealtimeDatabaseService _realtimeDatabaseService = RealtimeDatabaseService();
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +60,7 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
           ),
           Expanded(
             child: StreamBuilder<List<Invoice>>(
-              stream: _firestoreService.getInvoicesBySupplier(widget.supplier.id!),
+              stream: _realtimeDatabaseService.getInvoicesBySupplier(widget.supplier.id!),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text('خطأ: ${snapshot.error}'));
@@ -105,7 +105,7 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () {
-                                _firestoreService.deleteInvoice(invoice.id!);
+                                _realtimeDatabaseService.deleteInvoice(invoice.id!);
                               },
                             ),
                           ],

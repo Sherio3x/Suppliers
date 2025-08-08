@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class Supplier {
   String? id;
@@ -11,21 +11,18 @@ class Supplier {
     required this.productType,
   });
 
-  factory Supplier.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map<String, dynamic>;
+  factory Supplier.fromRealtimeDatabase(String id, dynamic data) {
     return Supplier(
-      id: doc.id,
+      id: id,
       name: data['name'] ?? '',
       productType: data['productType'] ?? '',
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toRealtimeDatabase() {
     return {
       'name': name,
       'productType': productType,
     };
   }
 }
-
-

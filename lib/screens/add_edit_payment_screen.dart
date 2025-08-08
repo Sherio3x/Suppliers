@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supplier_invoice_app/models/payment.dart';
-import 'package:supplier_invoice_app/services/firestore_service.dart';
+import 'package:supplier_invoice_app/services/realtime_database_service.dart';
 
 class AddEditPaymentScreen extends StatefulWidget {
   final Payment? payment;
@@ -16,7 +16,7 @@ class _AddEditPaymentScreenState extends State<AddEditPaymentScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  final FirestoreService _firestoreService = FirestoreService();
+  final RealtimeDatabaseService _realtimeDatabaseService = RealtimeDatabaseService();
 
   @override
   void initState() {
@@ -58,9 +58,9 @@ class _AddEditPaymentScreenState extends State<AddEditPaymentScreen> {
 
       try {
         if (widget.payment == null) {
-          await _firestoreService.addPayment(payment);
+          await _realtimeDatabaseService.addPayment(payment);
         } else {
-          await _firestoreService.updatePayment(payment);
+          await _realtimeDatabaseService.updatePayment(payment);
         }
         Navigator.pop(context);
       } catch (e) {

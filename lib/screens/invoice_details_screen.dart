@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supplier_invoice_app/models/invoice.dart';
 import 'package:supplier_invoice_app/models/payment.dart';
-import 'package:supplier_invoice_app/services/firestore_service.dart';
+import 'package:supplier_invoice_app/services/realtime_database_service.dart';
 import 'package:supplier_invoice_app/screens/add_edit_payment_screen.dart';
 
 class InvoiceDetailsScreen extends StatefulWidget {
@@ -14,7 +14,7 @@ class InvoiceDetailsScreen extends StatefulWidget {
 }
 
 class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
-  final FirestoreService _firestoreService = FirestoreService();
+  final RealtimeDatabaseService _realtimeDatabaseService = RealtimeDatabaseService();
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   FutureBuilder<double>(
-                    future: _firestoreService.getRemainingBalance(widget.invoice.id!),
+                    future: _realtimeDatabaseService.getRemainingBalance(widget.invoice.id!),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return Text(
@@ -74,7 +74,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
             ),
             Expanded(
               child: StreamBuilder<List<Payment>>(
-                stream: _firestoreService.getPaymentsByInvoice(widget.invoice.id!),
+                stream: _realtimeDatabaseService.getPaymentsByInvoice(widget.invoice.id!),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return Center(child: Text("خطأ: ${snapshot.error}"));
@@ -119,7 +119,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
                               IconButton(
                                 icon: const Icon(Icons.delete),
                                 onPressed: () {
-                                  _firestoreService.deletePayment(payment.id!);
+                                  _realtimeDatabaseService.deletePayment(payment.id!);
                                 },
                               ),
                             ],

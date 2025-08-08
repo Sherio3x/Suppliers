@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/supplier_list_screen.dart';
+import 'package:supplier_invoice_app/services/realtime_database_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,5 +24,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
