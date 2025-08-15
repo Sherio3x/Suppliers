@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supplier_invoice_app/models/payment.dart';
-import 'package:supplier_invoice_app/services/realtime_database_service.dart';
+import 'package:supplier_invoice_app/notifiers/payment_form_notifier.dart';
 
 class AddEditPaymentScreen extends StatefulWidget {
   final Payment? payment;
@@ -16,7 +17,6 @@ class _AddEditPaymentScreenState extends State<AddEditPaymentScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  final RealtimeDatabaseService _realtimeDatabaseService = RealtimeDatabaseService();
 
   @override
   void initState() {
@@ -47,7 +47,7 @@ class _AddEditPaymentScreenState extends State<AddEditPaymentScreen> {
     }
   }
 
-  void _savePayment() async {
+  void _savePayment(PaymentFormNotifier notifier) async {
     if (_formKey.currentState!.validate()) {
       Payment payment = Payment(
         id: widget.payment?.id,
@@ -56,16 +56,13 @@ class _AddEditPaymentScreenState extends State<AddEditPaymentScreen> {
         date: _selectedDate,
       );
 
-      try {
-        if (widget.payment == null) {
-          await _realtimeDatabaseService.addPayment(payment);
-        } else {
-          await _realtimeDatabaseService.updatePayment(payment);
-        }
+      await notifier.savePayment(payment);
+
+      if (notifier.state == PaymentFormState.success) {
         Navigator.pop(context);
-      } catch (e) {
+      } else if (notifier.state == PaymentFormState.error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ في حفظ البيانات: $e')),
+          SnackBar(content: Text('خطأ في حفظ البيانات: ${notifier.errorMessage}'))),
         );
       }
     }
@@ -73,50 +70,61 @@ class _AddEditPaymentScreenState extends State<AddEditPaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.payment == null ? 'إضافة دفع' : 'تعديل دفع'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'المبلغ',
-                  border: OutlineInputBorder(),
+    return ChangeNotifierProvider(
+      create: (_) => PaymentFormNotifier(),
+      child: Consumer<PaymentFormNotifier>(
+        builder: (context, notifier, child) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(widget.payment == null ? 'إضافة دفع' : 'تعديل دفع'),
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _amountController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'المبلغ',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'يرجى إدخال المبلغ';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'يرجى إدخال رقم صحيح';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ListTile(
+                      title: Text(
+                        'التاريخ: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                      ),
+                      trailing: const Icon(Icons.calendar_today),
+                      onTap: () => _selectDate(context),
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: notifier.state == PaymentFormState.loading
+                          ? null
+                          : () => _savePayment(notifier),
+                      child: notifier.state == PaymentFormState.loading
+                          ? const CircularProgressIndicator()
+                          : Text(widget.payment == null ? 'إضافة' : 'تحديث'),
+                    ),
+                  ],
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'يرجى إدخال المبلغ';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'يرجى إدخال رقم صحيح';
-                  }
-                  return null;
-                },
               ),
-              const SizedBox(height: 16),
-              ListTile(
-                title: Text(
-                  'التاريخ: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                ),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () => _selectDate(context),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _savePayment,
-                child: Text(widget.payment == null ? 'إضافة' : 'تحديث'),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

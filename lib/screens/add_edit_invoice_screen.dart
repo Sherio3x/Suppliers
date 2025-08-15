@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supplier_invoice_app/models/invoice.dart';
-import 'package:supplier_invoice_app/models/supplier.dart';
-import 'package:supplier_invoice_app/services/realtime_database_service.dart';
+import 'package:supplier_invoice_app/notifiers/invoice_form_notifier.dart';
 
 class AddEditInvoiceScreen extends StatefulWidget {
   final Invoice? invoice;
@@ -19,7 +19,6 @@ class _AddEditInvoiceScreenState extends State<AddEditInvoiceScreen> {
   final _totalController = TextEditingController();
   String _paymentType = 'نقدًا';
   DateTime _selectedDate = DateTime.now();
-  final RealtimeDatabaseService _realtimeDatabaseService = RealtimeDatabaseService();
 
   @override
   void initState() {
@@ -53,7 +52,7 @@ class _AddEditInvoiceScreenState extends State<AddEditInvoiceScreen> {
     }
   }
 
-  void _saveInvoice() async {
+  void _saveInvoice(InvoiceFormNotifier notifier) async {
     if (_formKey.currentState!.validate()) {
       Invoice invoice = Invoice(
         id: widget.invoice?.id,
@@ -64,16 +63,13 @@ class _AddEditInvoiceScreenState extends State<AddEditInvoiceScreen> {
         date: _selectedDate,
       );
 
-      try {
-        if (widget.invoice == null) {
-          await _realtimeDatabaseService.addInvoice(invoice);
-        } else {
-          await _realtimeDatabaseService.updateInvoice(invoice);
-        }
+      await notifier.saveInvoice(invoice);
+
+      if (notifier.state == InvoiceFormState.success) {
         Navigator.pop(context);
-      } catch (e) {
+      } else if (notifier.state == InvoiceFormState.error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ في حفظ البيانات: $e')),
+          SnackBar(content: Text('خطأ في حفظ البيانات: ${notifier.errorMessage}'))),
         );
       }
     }
@@ -81,86 +77,98 @@ class _AddEditInvoiceScreenState extends State<AddEditInvoiceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.invoice == null ? 'إضافة فاتورة' : 'تعديل فاتورة'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _productTypeController,
-                decoration: const InputDecoration(
-                  labelText: 'نوع المنتج',
-                  border: OutlineInputBorder(),
+    return ChangeNotifierProvider(
+      create: (_) => InvoiceFormNotifier(),
+      child: Consumer<InvoiceFormNotifier>(
+        builder: (context, notifier, child) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(widget.invoice == null ? 'إضافة فاتورة' : 'تعديل فاتورة'),
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  children: [
+                    TextFormField(
+                      controller: _productTypeController,
+                      decoration: const InputDecoration(
+                        labelText: 'نوع المنتج',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'يرجى إدخال نوع المنتج';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _totalController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'الإجمالي',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'يرجى إدخال الإجمالي';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'يرجى إدخال رقم صحيح';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: _paymentType,
+                      decoration: const InputDecoration(
+                        labelText: 'نوع الدفع',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: <String>['نقدًا', 'أجل']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _paymentType = newValue!;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ListTile(
+                      title: Text(
+                        'التاريخ: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                      ),
+                      trailing: const Icon(Icons.calendar_today),
+                      onTap: () => _selectDate(context),
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: notifier.state == InvoiceFormState.loading
+                          ? null
+                          : () => _saveInvoice(notifier),
+                      child: notifier.state == InvoiceFormState.loading
+                          ? const CircularProgressIndicator()
+                          : Text(widget.invoice == null ? 'إضافة' : 'تحديث'),
+                    ),
+                  ],
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'يرجى إدخال نوع المنتج';
-                  }
-                  return null;
-                },
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _totalController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'الإجمالي',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'يرجى إدخال الإجمالي';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'يرجى إدخال رقم صحيح';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _paymentType,
-                decoration: const InputDecoration(
-                  labelText: 'نوع الدفع',
-                  border: OutlineInputBorder(),
-                ),
-                items: <String>['نقدًا', 'أجل']
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _paymentType = newValue!;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                title: Text(
-                  'التاريخ: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                ),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () => _selectDate(context),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _saveInvoice,
-                child: Text(widget.invoice == null ? 'إضافة' : 'تحديث'),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 }
+
 
