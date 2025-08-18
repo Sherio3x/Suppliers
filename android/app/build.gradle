@@ -25,7 +25,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace = "com.example.supplier_invoice_app"
-    compileSdk = 34
+    compileSdk = 33
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
